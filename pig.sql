@@ -1,5 +1,15 @@
 begin;
 set client_min_messages to error;
+
+----------------------------
+-- "pig" is the schema, like a module. I like having
+-- one database with many schemas inside so they can
+-- easily reference each other if needed.
+--
+-- It also helps for testing, to do a quick drop and
+-- create, like this:
+----------------------------
+
 drop schema if exists pig cascade;
 create schema pig;
 
