@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 warp = { git = "https://github.com/seanmonstar/warp", rev = "fb64f24b6126efc618ca04a29acf1a7d4737c33c" }
 tokio = "0.2.0-alpha.6"
+serde = { version = "1", features = ["derive"] }
