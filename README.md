@@ -12,7 +12,7 @@ psql -U pig -d pig -f pig.sql
 ## Ruby:
 
 ```
-gem install pg sinatra thin
+gem install pg sinatra thin minitest
 ruby Ruby/pig.rb
 ```
 
