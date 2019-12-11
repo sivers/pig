@@ -11,7 +11,7 @@ SQL = File.read(DIR + '/pig.sql')
 
 error Sinatra::NotFound do
   content_type 'application/json'
-	[404, '{}']
+  [404, '{}']
 end
 
 class Pig
@@ -67,7 +67,7 @@ end
 # the "if" is only because of the halts in the "before" filter
 after do
   content_type 'application/json'
-	if @pig && @pig.res
+  if @pig && @pig.res
     status @pig.res['status']
     body @pig.res['js']
   end
