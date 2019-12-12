@@ -13,14 +13,19 @@ docker run --rm -d \
     -e POSTGRES_USER=pig \
     -e POSTGRES_PASSWORD=pig \
     -e POSTGRES_DB=pig \
+    -v ${PWD}/../pig.sql:/pig.sql:ro \
     postgres:11-alpine
+
+sleep 3
 
 test_db() {
     echo pig | docker exec PIGPQ psql -U pig -c "\c pig"
 }
 
 until test_db; do
-    sleep 5
+    sleep 3
 done
+
+echo pig | docker exec PIGPQ psql -U pig -f /pig.sql
 
 sleep infinity
