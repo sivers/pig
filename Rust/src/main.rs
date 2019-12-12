@@ -88,48 +88,21 @@ async fn main() {
     // If you wish to use dynamic dispatch instead and speed up compile times while
     // making it slightly slower at runtime, you can use Filter::boxed().
 
-    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(routes.recover(customize_error))
+        .run(([127, 0, 0, 1], 3030))
+        .await;
 }
-
-
-// https://github.com/seanmonstar/warp/blob/master/examples/errors.rs
-
-#[derive(Debug)]
-enum Error {
-    Oops,
-    Nope,
-}
-
-#[derive(Serialize)]
-struct ErrorMessage {}
-
-impl reject::Reject for Error {}
 
 use warp::http::StatusCode;
 use warp::{reject, Rejection, Reply};
 
-// This function receives a `Rejection` and tries to return a custom
-// value, othewise simply passes the rejection along.
 async fn customize_error(err: Rejection) -> Result<impl Reply, Rejection> {
-    if let Some(err) = err.find::<Error>() {
-        let (code, msg) = match err {
-            Error::Nope => (StatusCode::BAD_REQUEST, "Nope!"),
-            Error::Oops => (StatusCode::INTERNAL_SERVER_ERROR, ":fire: this is fine"),
-        };
-
-            let json = warp::reply::json(&ErrorMessage {
-            });
-            Ok(warp::reply::with_status(json, code))
-    } else if let Some(_) = err.find::<warp::reject::MethodNotAllowed>() {
-        // We can handle a specific error, here METHOD_NOT_ALLOWED,
-        // and render it however we want
-        let code = StatusCode::METHOD_NOT_ALLOWED;
-        let json = warp::reply::json(&ErrorMessage {
-        });
-        Ok(warp::reply::with_status(json, code))
+    if err.is_not_found() {
+        #[derive(Serialize)]
+        struct Empty {}
+        let json = warp::reply::json(&Empty {});
+        Ok(warp::reply::with_status(json, StatusCode::NOT_FOUND))
     } else {
-        // Could be a NOT_FOUND, or any other internal error... here we just
-        // let warp use its default rendering.
         Err(err)
     }
 }
