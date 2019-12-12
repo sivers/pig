@@ -11,7 +11,7 @@ pub struct Pig {
 
 impl Pig {
     pub async fn new() -> Result<Pig, Error> {
-        let (mut client, connection) = tokio_postgres::connect(
+        let (client, connection) = tokio_postgres::connect(
             "host=localhost user=pig password=pig dbname=pig",
             tokio_postgres::NoTls,
         )
@@ -65,7 +65,11 @@ impl Pig {
         process_result(row)
     }
 
-    pub async fn thing_add(&mut self, id: i32, thing: &str) -> Result<impl warp::Reply, warp::Rejection> {
+    pub async fn thing_add(
+        &mut self,
+        id: i32,
+        thing: &str,
+    ) -> Result<impl warp::Reply, warp::Rejection> {
         let row = self
             .client
             .query_one("SELECT status, js FROM thing_add($1, $2)", &[&id, &thing])
@@ -74,6 +78,21 @@ impl Pig {
         process_result(row)
     }
 
+    pub async fn person_patch(
+        &mut self,
+        id: i32,
+        name: &str,
+    ) -> Result<impl warp::Reply, warp::Rejection> {
+        let row = self
+            .client
+            .query_one(
+                "SELECT status, js FROM person_update($1, $2)",
+                &[&id, &name],
+            )
+            .await
+            .err_str("rip")?;
+        process_result(row)
+    }
 }
 
 fn process_result(row: tokio_postgres::Row) -> Result<impl warp::Reply, warp::Rejection> {

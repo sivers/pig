@@ -9,10 +9,10 @@ mod pig;
 use error::*;
 use pig::Pig;
 
+use std::collections::HashMap;
 use warp::http::StatusCode;
 use warp::Filter;
 use warp::{Rejection, Reply};
-use std::collections::HashMap;
 
 fn validate_key(key: &str) -> bool {
     if key.len() != 4 {
@@ -43,19 +43,31 @@ async fn things_get((mut pig, person_id): (Pig, i32)) -> Result<impl Reply, Reje
     pig.things_get(person_id).await
 }
 
-async fn things_post((mut pig, person_id): (Pig, i32), body: HashMap<String, String>) -> Result<impl Reply, Rejection> {
+async fn things_post(
+    (mut pig, person_id): (Pig, i32),
+    body: HashMap<String, String>,
+) -> Result<impl Reply, Rejection> {
     if !body.contains_key("name") {
         return Err(Error("missing name".into()).into());
     }
     pig.thing_add(person_id, &body["name"]).await
 }
 
+async fn person_patch(
+    (mut pig, person_id): (Pig, i32),
+    body: HashMap<String, String>,
+) -> Result<impl Reply, Rejection> {
+    if !body.contains_key("name") {
+        return Err(Error("missing name".into()).into());
+    }
+    pig.person_patch(person_id, &body["name"]).await
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let key_header = warp::header::<String>("apikey")
         .or_else(|_| async move { Err(Error("needs apikey header".into()).into()) });
-    let form_body = warp::body::content_length_limit(1024 * 16).and(warp::body::form());
+    let form_body = warp::body::form();
 
     // GET /
     let people_get = warp::get()
@@ -79,16 +91,23 @@ async fn main() -> Result<(), Error> {
         .and(form_body)
         .and_then(things_post);
 
+    // PATCH /person
+    let person_patch = warp::patch()
+        .and(warp::path("person"))
+        .and(key_header.clone())
+        .and_then(auth)
+        .and(form_body)
+        .and_then(person_patch);
+
+    // POST /things
 
     // GET /person/<id>
-    // PATCH /person
 
     // GET /thing/<id>
     // PATCH /thing/<id>
-    // POST /things
     // DELETE /thing/<id>
 
-    let routes = people_get.or(things_get).or(things_post);
+    let routes = people_get.or(things_get).or(things_post).or(person_patch);
     warp::serve(routes.recover(customize_error))
         .run(([127, 0, 0, 1], 3030))
         .await;
