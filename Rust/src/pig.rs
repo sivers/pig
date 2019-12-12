@@ -52,7 +52,16 @@ impl Pig {
             .client
             .query_one("SELECT status, js FROM people_get()", &[])
             .await
-            .err_str("people_get")?;
+            .err_str("rip")?;
+        process_result(row)
+    }
+
+    pub async fn things_get(&mut self) -> Result<impl warp::Reply, warp::Rejection> {
+        let row = self
+            .client
+            .query_one("SELECT status, js FROM things_get()", &[])
+            .await
+            .err_str("rip")?;
         process_result(row)
     }
 }

@@ -34,8 +34,12 @@ async fn auth(key: String) -> Result<(Pig, i32), Rejection> {
     Ok((pig, person_id))
 }
 
-async fn people_get((mut pig, person_id): (Pig, i32)) -> Result<impl Reply, Rejection> {
+async fn people_get((mut pig, _person_id): (Pig, i32)) -> Result<impl Reply, Rejection> {
     pig.people_get().await
+}
+
+async fn things_get((mut pig, _person_id): (Pig, i32)) -> Result<impl Reply, Rejection> {
+    pig.things_get().await
 }
 
 #[tokio::main]
@@ -49,9 +53,16 @@ async fn main() -> Result<(), Error> {
         .and_then(auth)
         .and_then(people_get);
 
+    // GET /things
+    let things_get = warp::get()
+        .and(key_header.clone())
+        .and_then(auth)
+        .and_then(things_get);
+
+
     // GET /person/<id>
     // PATCH /person
-    // GET /things
+
     // GET /thing/<id>
     // PATCH /thing/<id>
     // POST /things
