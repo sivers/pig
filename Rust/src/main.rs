@@ -70,19 +70,19 @@ fn check_id(id: u32) -> Result<(), Error> {
     }
 }
 
-async fn person_get((mut pig, _person_id): (Pig, i32), id: u32) -> Result<impl Reply, Rejection> {
+async fn person_get(id: u32, (mut pig, _person_id): (Pig, i32)) -> Result<impl Reply, Rejection> {
     check_id(id)?;
     pig.person_get(id as i32).await
 }
 
-async fn thing_get((mut pig, person_id): (Pig, i32), id: u32) -> Result<impl Reply, Rejection> {
+async fn thing_get(id: u32, (mut pig, person_id): (Pig, i32)) -> Result<impl Reply, Rejection> {
     check_id(id)?;
     pig.thing_get(person_id, id as i32).await
 }
 
 async fn thing_patch(
-    (mut pig, person_id): (Pig, i32),
     thing_id: u32,
+    (mut pig, person_id): (Pig, i32),
     body: HashMap<String, String>,
 ) -> Result<impl Reply, Rejection> {
     check_id(thing_id)?;
@@ -93,78 +93,69 @@ async fn thing_patch(
 }
 
 async fn thing_delete(
-    (mut pig, person_id): (Pig, i32),
     thing_id: u32,
+    (mut pig, person_id): (Pig, i32),
 ) -> Result<impl Reply, Rejection> {
     check_id(thing_id)?;
     pig.thing_delete(person_id, thing_id as i32).await
 }
 
-
-
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let key_header = warp::header::<String>("apikey")
-        .or_else(|_| async move { Err(Error("needs apikey header".into()).into()) });
+    let auth = warp::header::<String>("apikey")
+        .or_else(|_| async move { Err(Error("needs apikey header".into()).into()) })
+        .and_then(auth);
     let form_body = warp::body::form();
 
     // GET /
     let people_get = warp::get()
         .and(warp::path::end())
-        .and(key_header.clone())
-        .and_then(auth)
+        .and(auth)
         .and_then(people_get);
 
     // GET /things
     let things_get = warp::get()
         .and(warp::path("things"))
-        .and(key_header.clone())
-        .and_then(auth)
+        .and(auth)
         .and_then(things_get);
 
     // POST /things
     let things_post = warp::post()
         .and(warp::path("things"))
-        .and(key_header.clone())
-        .and_then(auth)
+        .and(auth)
         .and(form_body)
         .and_then(things_post);
 
     // PATCH /person
     let person_patch = warp::patch()
         .and(warp::path("person"))
-        .and(key_header.clone())
-        .and_then(auth)
+        .and(auth)
         .and(form_body)
         .and_then(person_patch);
 
     // GET /person/<id>
     let person_get = warp::get()
-        .and(key_header.clone())
-        .and_then(auth)
         .and(path!("person" / u32))
+        .and(auth)
         .and_then(person_get);
 
     // GET /thing/<id>
     let thing_get = warp::get()
-        .and(key_header.clone())
-        .and_then(auth)
         .and(path!("thing" / u32))
+        .and(auth)
         .and_then(thing_get);
 
     // PATCH /thing/<id>
     let thing_patch = warp::patch()
-        .and(key_header.clone())
-        .and_then(auth)
         .and(path!("thing" / u32))
-        .and(form_body.clone())
+        .and(auth)
+        .and(form_body)
         .and_then(thing_patch);
 
     // DELETE /thing/<id>
     let thing_delete = warp::delete()
-        .and(key_header.clone())
-        .and_then(auth)
         .and(path!("thing" / u32))
+        .and(auth)
         .and_then(thing_delete);
 
     let routes = people_get
