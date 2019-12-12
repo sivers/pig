@@ -112,53 +112,53 @@ async fn main() -> Result<(), Error> {
     let form_body = warp::body::form();
 
     // GET /
-    let people_get = warp::get()
-        .and(warp::path::end())
+    let people_get = warp::path::end()
+        .and(warp::get())
         .and(auth)
         .and_then(people_get);
 
     // GET /things
-    let things_get = warp::get()
-        .and(warp::path("things"))
+    let things_get = warp::path("things")
+        .and(warp::get())
         .and(auth)
         .and_then(things_get);
 
     // POST /things
-    let things_post = warp::post()
-        .and(warp::path("things"))
+    let things_post = warp::path("things")
+        .and(warp::post())
         .and(auth)
         .and(form_body)
         .and_then(things_post);
 
     // PATCH /person
-    let person_patch = warp::patch()
-        .and(warp::path("person"))
+    let person_patch = warp::path("person")
+        .and(warp::patch())
         .and(auth)
         .and(form_body)
         .and_then(person_patch);
 
     // GET /person/<id>
-    let person_get = warp::get()
-        .and(path!("person" / u32))
+    let person_get = path!("person" / u32)
+        .and(warp::get())
         .and(auth)
         .and_then(person_get);
 
     // GET /thing/<id>
-    let thing_get = warp::get()
-        .and(path!("thing" / u32))
+    let thing_get = path!("thing" / u32)
+        .and(warp::get())
         .and(auth)
         .and_then(thing_get);
 
     // PATCH /thing/<id>
-    let thing_patch = warp::patch()
-        .and(path!("thing" / u32))
+    let thing_patch = path!("thing" / u32)
+        .and(warp::patch())
         .and(auth)
         .and(form_body)
         .and_then(thing_patch);
 
     // DELETE /thing/<id>
-    let thing_delete = warp::delete()
-        .and(path!("thing" / u32))
+    let thing_delete = path!("thing" / u32)
+        .and(warp::delete())
         .and(auth)
         .and_then(thing_delete);
 
@@ -168,8 +168,8 @@ async fn main() -> Result<(), Error> {
         .or(person_patch)
         .or(person_get)
         .or(thing_patch)
-        .or(thing_delete)
-        .or(thing_get);
+        .or(thing_get)
+        .or(thing_delete);
     warp::serve(routes.recover(customize_error))
         .run(([127, 0, 0, 1], 3030))
         .await;

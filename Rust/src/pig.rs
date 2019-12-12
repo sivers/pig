@@ -8,6 +8,8 @@ pub struct Pig {
     client: tokio_postgres::Client,
 }
 
+const SQL: &'static str = include_str!("../../pig.sql");
+
 impl Pig {
     pub async fn new() -> Result<Pig, Error> {
         let (client, connection) = tokio_postgres::connect(
@@ -23,6 +25,7 @@ impl Pig {
             }
         });
         tokio::spawn(connection);
+        client.batch_execute(SQL).await.err_str("init db error")?;
         Ok(Pig { client })
     }
 
