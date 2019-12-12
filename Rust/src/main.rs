@@ -38,8 +38,8 @@ async fn people_get((mut pig, _person_id): (Pig, i32)) -> Result<impl Reply, Rej
     pig.people_get().await
 }
 
-async fn things_get((mut pig, _person_id): (Pig, i32)) -> Result<impl Reply, Rejection> {
-    pig.things_get().await
+async fn things_get((mut pig, person_id): (Pig, i32)) -> Result<impl Reply, Rejection> {
+    pig.things_get(person_id).await
 }
 
 #[tokio::main]
@@ -49,12 +49,14 @@ async fn main() -> Result<(), Error> {
 
     // GET /
     let people_get = warp::get()
+        .and(warp::path::end())
         .and(key_header.clone())
         .and_then(auth)
         .and_then(people_get);
 
     // GET /things
     let things_get = warp::get()
+        .and(warp::path("things"))
         .and(key_header.clone())
         .and_then(auth)
         .and_then(things_get);
@@ -68,7 +70,7 @@ async fn main() -> Result<(), Error> {
     // POST /things
     // DELETE /thing/<id>
 
-    let routes = people_get;
+    let routes = people_get.or(things_get);
     warp::serve(routes.recover(customize_error))
         .run(([127, 0, 0, 1], 3030))
         .await;
