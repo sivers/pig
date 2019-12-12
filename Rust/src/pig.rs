@@ -100,12 +100,14 @@ impl Pig {
     ) -> Result<impl warp::Reply, warp::Rejection> {
         let row = self
             .client
-            .query_one("SELECT status, js FROM thing_delete($1, $2)", &[&person_id, &thing_id])
+            .query_one(
+                "SELECT status, js FROM thing_delete($1, $2)",
+                &[&person_id, &thing_id],
+            )
             .await
             .err_str("rip")?;
         process_result(row)
     }
-
 
     pub async fn person_patch(
         &mut self,

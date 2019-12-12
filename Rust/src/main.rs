@@ -27,10 +27,13 @@ fn validate_key(key: &str) -> bool {
 
 async fn auth(key: String) -> Result<(Pig, i32), Rejection> {
     if !validate_key(&key) {
-        return Err(Error("needs apikey header".into()).into());
+        Err(custom_err(401, "needs apikey header"))?;
     }
     let mut pig = Pig::new().await?;
-    let person_id = pig.apikey_get(&key).await?.err_str("wrong apikey")?;
+    let person_id = match pig.apikey_get(&key).await? {
+        Some(person_id) => person_id,
+        None => return Err(custom_err(401, "wrong apikey").into()),
+    };
     Ok((pig, person_id))
 }
 
@@ -47,7 +50,7 @@ async fn things_post(
     body: HashMap<String, String>,
 ) -> Result<impl Reply, Rejection> {
     if !body.contains_key("name") {
-        return Err(Error("missing name".into()).into());
+        Err(custom_err(412, "missing name"))?;
     }
     pig.thing_add(person_id, &body["name"]).await
 }
@@ -57,14 +60,14 @@ async fn person_patch(
     body: HashMap<String, String>,
 ) -> Result<impl Reply, Rejection> {
     if !body.contains_key("name") {
-        return Err(Error("missing name".into()).into());
+        Err(custom_err(412, "missing name"))?;
     }
     pig.person_patch(person_id, &body["name"]).await
 }
 
 fn check_id(id: u32) -> Result<(), Error> {
     if id == 0 || id > 999999 {
-        Err(Error("not found".into()))
+        Err(custom_err(404, ""))
     } else {
         Ok(())
     }
@@ -87,9 +90,10 @@ async fn thing_patch(
 ) -> Result<impl Reply, Rejection> {
     check_id(thing_id)?;
     if !body.contains_key("name") {
-        return Err(Error("missing name".into()).into());
+        Err(custom_err(412, "missing name"))?;
     }
-    pig.thing_patch(person_id, thing_id as i32, &body["name"]).await
+    pig.thing_patch(person_id, thing_id as i32, &body["name"])
+        .await
 }
 
 async fn thing_delete(
@@ -103,7 +107,7 @@ async fn thing_delete(
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let auth = warp::header::<String>("apikey")
-        .or_else(|_| async move { Err(Error("needs apikey header".into()).into()) })
+        .or_else(|_| async move { Err(custom_err(401, "needs apikey header").into()) })
         .and_then(auth);
     let form_body = warp::body::form();
 

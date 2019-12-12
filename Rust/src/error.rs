@@ -8,23 +8,18 @@ impl<T, E: std::fmt::Debug> ErrStr<T> for Result<T, E> {
             Ok(t) => Ok(t),
             Err(e) => {
                 println!("{:?}", e);
-                Err(Error(s.into()))
+                Err(Error(500, s.into()))
             }
         }
     }
 }
 
-impl<T> ErrStr<T> for Option<T> {
-    fn err_str<S: Into<Box<str>>>(self, s: S) -> Result<T, Error> {
-        match self {
-            Some(t) => Ok(t),
-            None => Err(Error(s.into())),
-        }
-    }
-}
-
 #[derive(Debug)]
-pub struct Error(pub Box<str>);
+pub struct Error(pub u16, pub Box<str>);
+
+pub fn custom_err<S: std::convert::Into<Box<str>>>(code: u16, msg: S) -> Error {
+    Error(code, msg.into())
+}
 
 impl warp::reject::Reject for Error {}
 
@@ -42,16 +37,25 @@ pub struct ErrMsg<'a> {
     error: &'a Box<str>,
 }
 
+#[derive(Serialize)]
+struct Empty {}
+
 pub async fn customize_error(err: Rejection) -> Result<impl Reply, Rejection> {
     if err.is_not_found() {
-        #[derive(Serialize)]
-        struct Empty {}
         let json = warp::reply::json(&Empty {});
         Ok(warp::reply::with_status(json, StatusCode::NOT_FOUND))
     } else if let Some(err) = err.find::<Error>() {
-        let json = warp::reply::json(&ErrMsg { error: &err.0 });
-        let code = StatusCode::INTERNAL_SERVER_ERROR;
-        Ok(warp::reply::with_status(json, code))
+        let code = err.0;
+        if code == 404 {
+            let json = warp::reply::json(&Empty {});
+            Ok(warp::reply::with_status(json, StatusCode::NOT_FOUND))
+        } else {
+            let json = warp::reply::json(&ErrMsg { error: &err.1 });
+            Ok(warp::reply::with_status(
+                json,
+                StatusCode::from_u16(code).expect("Invalid HTTP code"),
+            ))
+        }
     } else {
         Err(err)
     }
