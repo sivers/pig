@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -Eeuxo pipefail
+
+stop() {
+    docker stop PIGPQ || true
+}
+trap stop SIGINT SIGQUIT
+stop
+
+docker run --rm -d \
+    --name PIGPQ \
+    -p 5432:5432 \
+    -e POSTGRES_USER=pig \
+    -e POSTGRES_PASSWORD=pig \
+    -e POSTGRES_DB=pig \
+    postgres:11-alpine
+
+test_db() {
+    echo pig | docker exec PIGPQ psql -U pig -c "\c pig"
+}
+
+until test_db; do
+    sleep 5
+done
+
+sleep infinity
