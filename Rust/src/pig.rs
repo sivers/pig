@@ -64,6 +64,16 @@ impl Pig {
             .err_str("rip")?;
         process_result(row)
     }
+
+    pub async fn thing_add(&mut self, id: i32, thing: &str) -> Result<impl warp::Reply, warp::Rejection> {
+        let row = self
+            .client
+            .query_one("SELECT status, js FROM thing_add($1, $2)", &[&id, &thing])
+            .await
+            .err_str("rip")?;
+        process_result(row)
+    }
+
 }
 
 fn process_result(row: tokio_postgres::Row) -> Result<impl warp::Reply, warp::Rejection> {
