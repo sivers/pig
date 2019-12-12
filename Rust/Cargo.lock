@@ -175,6 +175,7 @@ name = "example"
 version = "0.1.0"
 dependencies = [
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_json 1.0.44 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.2.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio-postgres 0.5.0-alpha.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "warp 0.2.0-alpha.0 (git+https://github.com/seanmonstar/warp?rev=fb64f24b6126efc618ca04a29acf1a7d4737c33c)",
@@ -778,6 +779,8 @@ dependencies = [
  "bytes 0.4.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "fallible-iterator 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "postgres-protocol 0.5.0-alpha.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_json 1.0.44 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

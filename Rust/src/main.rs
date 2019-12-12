@@ -5,8 +5,19 @@ extern crate serde;
 
 use warp::Filter;
 
+mod error;
+use error::ErrStr;
+
+mod pig;
+use pig::Pig;
+
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<str>> {
+    let mut pig = Pig::new().await?;
+    pig.apikey_get("aaaa").await?;
+    pig.apikey_get("aaa").await?;
+
+    return Ok(());
     // GET /
     // GET /person/<id>
     // PATCH /person
@@ -16,11 +27,12 @@ async fn main() {
     // POST /things
     // DELETE /thing/<id>
 
-
     let routes = warp::get().map(|| "Hello, World!");
     warp::serve(routes.recover(customize_error))
         .run(([127, 0, 0, 1], 3030))
         .await;
+
+    Ok(())
 }
 
 use warp::http::StatusCode;
