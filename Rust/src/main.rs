@@ -7,6 +7,16 @@ use warp::Filter;
 
 #[tokio::main]
 async fn main() {
+    // GET /
+    // GET /person/<id>
+    // PATCH /person
+    // GET /things
+    // GET /thing/<id>
+    // PATCH /thing/<id>
+    // POST /things
+    // DELETE /thing/<id>
+
+
     let routes = warp::get().map(|| "Hello, World!");
     warp::serve(routes.recover(customize_error))
         .run(([127, 0, 0, 1], 3030))
