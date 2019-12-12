@@ -35,7 +35,7 @@ impl std::convert::From<Error> for warp::Rejection {
 }
 
 use warp::http::StatusCode;
-use warp::{reject, Rejection, Reply};
+use warp::{Rejection, Reply};
 
 #[derive(Serialize)]
 pub struct ErrMsg<'a> {

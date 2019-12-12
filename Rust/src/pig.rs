@@ -1,7 +1,6 @@
 use tokio::prelude::*;
 
 use crate::error::*;
-use tokio_postgres::types::ToSql;
 
 use warp::http::StatusCode;
 
@@ -65,6 +64,22 @@ impl Pig {
         process_result(row)
     }
 
+    pub async fn thing_get(
+        &mut self,
+        id: i32,
+        thing_id: i32,
+    ) -> Result<impl warp::Reply, warp::Rejection> {
+        let row = self
+            .client
+            .query_one(
+                "SELECT status, js FROM thing_get($1, $2)",
+                &[&id, &thing_id],
+            )
+            .await
+            .err_str("rip")?;
+        process_result(row)
+    }
+
     pub async fn thing_add(
         &mut self,
         id: i32,
@@ -78,6 +93,20 @@ impl Pig {
         process_result(row)
     }
 
+    pub async fn thing_delete(
+        &mut self,
+        person_id: i32,
+        thing_id: i32,
+    ) -> Result<impl warp::Reply, warp::Rejection> {
+        let row = self
+            .client
+            .query_one("SELECT status, js FROM thing_delete($1, $2)", &[&person_id, &thing_id])
+            .await
+            .err_str("rip")?;
+        process_result(row)
+    }
+
+
     pub async fn person_patch(
         &mut self,
         id: i32,
@@ -89,6 +118,32 @@ impl Pig {
                 "SELECT status, js FROM person_update($1, $2)",
                 &[&id, &name],
             )
+            .await
+            .err_str("rip")?;
+        process_result(row)
+    }
+
+    pub async fn thing_patch(
+        &mut self,
+        person_id: i32,
+        thing_id: i32,
+        name: &str,
+    ) -> Result<impl warp::Reply, warp::Rejection> {
+        let row = self
+            .client
+            .query_one(
+                "SELECT status, js FROM thing_update($1, $2, $3)",
+                &[&person_id, &thing_id, &name],
+            )
+            .await
+            .err_str("rip")?;
+        process_result(row)
+    }
+
+    pub async fn person_get(&mut self, id: i32) -> Result<impl warp::Reply, warp::Rejection> {
+        let row = self
+            .client
+            .query_one("SELECT status, js FROM person_get($1)", &[&id])
             .await
             .err_str("rip")?;
         process_result(row)

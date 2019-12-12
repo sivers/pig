@@ -10,7 +10,6 @@ use error::*;
 use pig::Pig;
 
 use std::collections::HashMap;
-use warp::http::StatusCode;
 use warp::Filter;
 use warp::{Rejection, Reply};
 
@@ -63,6 +62,46 @@ async fn person_patch(
     pig.person_patch(person_id, &body["name"]).await
 }
 
+fn check_id(id: u32) -> Result<(), Error> {
+    if id == 0 || id > 999999 {
+        Err(Error("not found".into()))
+    } else {
+        Ok(())
+    }
+}
+
+async fn person_get((mut pig, _person_id): (Pig, i32), id: u32) -> Result<impl Reply, Rejection> {
+    check_id(id)?;
+    pig.person_get(id as i32).await
+}
+
+async fn thing_get((mut pig, person_id): (Pig, i32), id: u32) -> Result<impl Reply, Rejection> {
+    check_id(id)?;
+    pig.thing_get(person_id, id as i32).await
+}
+
+async fn thing_patch(
+    (mut pig, person_id): (Pig, i32),
+    thing_id: u32,
+    body: HashMap<String, String>,
+) -> Result<impl Reply, Rejection> {
+    check_id(thing_id)?;
+    if !body.contains_key("name") {
+        return Err(Error("missing name".into()).into());
+    }
+    pig.thing_patch(person_id, thing_id as i32, &body["name"]).await
+}
+
+async fn thing_delete(
+    (mut pig, person_id): (Pig, i32),
+    thing_id: u32,
+) -> Result<impl Reply, Rejection> {
+    check_id(thing_id)?;
+    pig.thing_delete(person_id, thing_id as i32).await
+}
+
+
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let key_header = warp::header::<String>("apikey")
@@ -99,15 +138,43 @@ async fn main() -> Result<(), Error> {
         .and(form_body)
         .and_then(person_patch);
 
-    // POST /things
-
     // GET /person/<id>
+    let person_get = warp::get()
+        .and(key_header.clone())
+        .and_then(auth)
+        .and(path!("person" / u32))
+        .and_then(person_get);
 
     // GET /thing/<id>
-    // PATCH /thing/<id>
-    // DELETE /thing/<id>
+    let thing_get = warp::get()
+        .and(key_header.clone())
+        .and_then(auth)
+        .and(path!("thing" / u32))
+        .and_then(thing_get);
 
-    let routes = people_get.or(things_get).or(things_post).or(person_patch);
+    // PATCH /thing/<id>
+    let thing_patch = warp::patch()
+        .and(key_header.clone())
+        .and_then(auth)
+        .and(path!("thing" / u32))
+        .and(form_body.clone())
+        .and_then(thing_patch);
+
+    // DELETE /thing/<id>
+    let thing_delete = warp::delete()
+        .and(key_header.clone())
+        .and_then(auth)
+        .and(path!("thing" / u32))
+        .and_then(thing_delete);
+
+    let routes = people_get
+        .or(things_get)
+        .or(things_post)
+        .or(person_patch)
+        .or(person_get)
+        .or(thing_patch)
+        .or(thing_delete)
+        .or(thing_get);
     warp::serve(routes.recover(customize_error))
         .run(([127, 0, 0, 1], 3030))
         .await;
