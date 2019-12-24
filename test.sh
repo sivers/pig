@@ -5,7 +5,7 @@
 # sh test.sh https://cloudfr.ee/
 host=$1
 
-# TODO: put into a real assert, in a scripting language
+# TODO: put into a real assert
 
 echo "ASSERT: 401 needs apikey header"
 curl -i $host
