@@ -19,7 +19,7 @@ ruby Ruby/pig.rb
 ## Test:
 
 ```
-sh test.sh
+sh test.sh http://127.0.0.1:4567/
 ```
 
 # WRITE YOURS:
@@ -80,4 +80,11 @@ See lines 80-113 of the Ruby file for an example.
 That's it!
 
 The Ruby example code here works perfectly, so I'm curious to see how it would work in other languages. 
+
+If you want to write one, please:
+
+1. fork
+2. make a subdirectory with the name of your language (like "Ruby/" and "Rust/" here) with all code inside
+3. update this README.md to add the INSTALL instructions for your language, like lines 12-17 of this README.md
+4. pull request
 
