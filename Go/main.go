@@ -1,5 +1,20 @@
 package main
 
+// QUESTIONS
+//
+// #1: Is all of this Unmarshal-to-obj necessary?
+// PostgreSQL is already returning JSON string.
+// Send that string to HTTP response directly, instead.
+//
+// #2: Similar to #1, PostgreSQL is already returning HTTP status code.
+// Send that status code to HTTP response instead of Gin constants.
+//
+// #3: Instead of new and unique function for each route,
+// one common function that just takes a string, like the Ruby example.
+// Then middleware to handle parameter requirements before that.
+//
+// Any answers? Please email derek@sivers.org
+
 import (
 	"encoding/json"
 	"fmt"
