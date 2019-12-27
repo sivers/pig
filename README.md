@@ -9,6 +9,14 @@ createdb -U pig pig
 psql -U pig -d pig -f pig.sql
 ```
 
+## GO:
+[Download](https://golang.org/dl/) and Install Go (minimum) version 1.12.* 
+
+```
+GO111MODULE=on go mod download
+go run *.go
+```
+
 ## Ruby:
 
 ```
