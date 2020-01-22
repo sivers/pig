@@ -12,7 +12,7 @@ psql -U pig -d pig -f pig.sql
 ## Ruby:
 
 ```
-gem install pg sinatra thin minitest
+gem install pg sinatra
 ruby Ruby/pig.rb
 ```
 
@@ -20,13 +20,6 @@ ruby Ruby/pig.rb
 
 ```
 sh test.sh http://127.0.0.1:4567/
-```
-
-## Go:
-
-```
-GO111MODULE=on go mod download
-go run *.go
 ```
 
 # WRITE YOURS:
@@ -40,13 +33,12 @@ Avoid repetition since every query is *select status, js from schema.function(pa
 See lines 17-37 of the Ruby file for an example.
 
 1. Init with the schema name, returning curried function or object to be used from then on.
-2. paramstring function takes variadic arguments and returns query param string:
-	* no arguments returns "()"
-	* one argument returns "($1)"
-	* two arguments returns "($1, $2)"
-	* three arguments returns "($1, $2, $3)"
+2. paramstring function takes a number and returns query param string:
+	* 0 returns "()"
+	* 1 returns "($1)"
+	* 2 returns "($1, $2)"
+	* 3 returns "($1, $2, $3)"
 	* … etc.
-	* Ignore the actual arguments, just count them to make the strings described above.
 3. query ("q") function takes the function name and variadic arguments to build the SQL string, for example:
 	* db = Pig.new('cow')
 	* db.q('foo') makes "select status, js from cow.foo()"

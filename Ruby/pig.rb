@@ -24,15 +24,15 @@ class Pig
   end
 
   # make the "($1,$2)" string for inside exec_params query
-  def paramstring(params)
-    '(%s)' % (1..params.size).map {|i| "$#{i}"}.join(',')
+  def paramstring(num)
+    '(%s)' % (1..num).map {|i| "$#{i}"}.join(',')
   end
 
   # INPUT: function name, varargs parameters
   # OUTPUT: @res['status'] (HTTP status), @res['js'] (JSON)
   def q(func, *params)
     @res = DB.exec_params("SELECT status, js FROM %s.%s%s" %
-      [@schema, func, paramstring(params)], params)[0]
+      [@schema, func, paramstring(params.size)], params)[0]
   end
 end
 
