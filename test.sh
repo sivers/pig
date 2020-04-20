@@ -80,7 +80,7 @@ curl -H "apikey: aaaa" --request PATCH --data "name=couch" "${host}thing/1"
 echo
 
 echo "ASSERT: 412 Precondition Failed (missing name)"
-curl -i -H "apikey: aaaa" --request POST "${host}things"
+curl -i -H "apikey: aaaa" --request POST --data "" "${host}things" 
 echo
 
 echo "ASSERT: new thing id:5 name:gum"
