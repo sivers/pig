@@ -139,5 +139,11 @@ def things_get(pig_):
     pig_.q("things_get", pig_.person_id)
 
 
+@app.route("/thing/<regex('[1-9][0-9]{0,5}'):id>")
+@before_and_after()
+def thing_get(pig_, id):
+    pig_.q("thing_get", pig_.person_id, id)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
