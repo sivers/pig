@@ -133,5 +133,11 @@ def person_update(pig_):
     pig_.q("person_update", pig_.person_id, request.form.get("name"))
 
 
+@app.route("/things")
+@before_and_after()
+def things_get(pig_):
+    pig_.q("things_get", pig_.person_id)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
