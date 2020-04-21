@@ -1,9 +1,9 @@
-import psycopg2
-from flask import Flask, jsonify, request, abort, Response
 import os
-import psycopg2.extras
 import re
 from functools import wraps
+import psycopg2
+import psycopg2.extras
+from flask import Flask, jsonify, request, abort, Response
 from werkzeug.routing import BaseConverter
 
 app = Flask(__name__)
@@ -161,4 +161,4 @@ def thing_get(pig_, id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False, port=4567)
