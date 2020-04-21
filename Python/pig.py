@@ -133,10 +133,15 @@ def person_update(pig_):
     pig_.q("person_update", pig_.person_id, request.form.get("name"))
 
 
-@app.route("/things")
+@app.route("/things", methods=["GET", "POST"])
 @before_and_after()
 def things_get(pig_):
-    pig_.q("things_get", pig_.person_id)
+    if request.method == "GET":
+        pig_.q("things_get", pig_.person_id)
+    if request.method == "POST": 
+        if request.form.get("name") is None:
+            raise MissingName
+        pig_.q("thing_add", pig_.person_id, request.form.get("name"))
 
 
 @app.route("/thing/<regex('[1-9][0-9]{0,5}'):id>", methods=['GET', 'PATCH'])
