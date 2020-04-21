@@ -1,5 +1,6 @@
 import psycopg2
-from flask import Flask, jsonify, request, abort
+import json
+from flask import Flask, jsonify, request, abort, Response
 import os
 import psycopg2.extras
 import re
@@ -19,7 +20,10 @@ with open(DIR + '/pig.sql') as f:
 def not_found(error):
     return jsonify("{}"), 404
 
-@app.errorhandler(401)
+class MissingApi(Exception):
+    pass
+
+@app.errorhandler(MissingApi)
 def missing_apikey(error):
     return jsonify("{'error': 'needs apikey header'}"), 401
 
@@ -45,11 +49,20 @@ def before():
     print(apikey)
     print(apikey is None)
     if (apikey is None) or (re.search("\A[a-z]{4}\Z", apikey) is None):
-        abort(401)
+        raise MissingApi 
 
     DB.execute(SQL) 
 
     pig_ = Pig('pig')
+
+    pig_.q('apikey_get', apikey)
+    print(pig_.res)
+    if 200 == pig_.res['status']:
+        pig_.person_id = json.loads(pig_.res['js']).get('person_id')
+        pig_.res = None
+    else:
+        pig_.res = None
+        return jsonify("{'error':'wrong apikey'}"), 401
 
     return pig_
 
