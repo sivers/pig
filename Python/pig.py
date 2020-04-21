@@ -76,10 +76,7 @@ class Pig:
 
 
 def before():
-    print("test wrapper")
     apikey = request.headers.get("Apikey")
-    print(apikey)
-    print(apikey is None)
     if (apikey is None) or (re.search("\A[a-z]{4}\Z", apikey) is None):
         raise MissingApikey
 
@@ -100,7 +97,6 @@ def before():
 
 
 def after(pig_):
-    print("after")
     if pig_ and pig_.res:
         return jsonify(pig_.res["js"]), pig_.res["status"]
 
@@ -132,10 +128,9 @@ def person_get(pig_, id):
 @app.route("/person", methods=["PATCH"])
 @before_and_after()
 def person_update(pig_):
-    print(request.args.get("name"))
-    if request.args.get("name") is None:
+    if request.form.get("name") is None:
         raise MissingName    
-    pig_.q("person_update", pig_.person_id, request.args.get("name"))
+    pig_.q("person_update", pig_.person_id, request.form.get("name"))
 
 
 if __name__ == "__main__":
