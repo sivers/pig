@@ -16,6 +16,12 @@ gem install pg sinatra
 ruby Ruby/pig.rb
 ```
 
+## Python:
+```
+pip3 install flask, psycopg2
+python3 Python/pig.py
+```
+
 ## Test:
 
 ```
