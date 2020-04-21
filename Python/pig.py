@@ -1,13 +1,13 @@
 import psycopg2
 from flask import Flask, jsonify
 import os
-
+import psycopg2.extras
 
 app = Flask(__name__)
 
 conn = psycopg2.connect("dbname=pig user=pig")
 conn.autocommit = True
-DB = conn.cursor() 
+DB = conn.cursor(cursor_factory=psycopg2.extras.DictCursor) 
 
 DIR = os.path.abspath(".")
 with open(DIR + '/pig.sql') as f:
@@ -31,7 +31,7 @@ class Pig:
 
     def q(self, func, *params):
         DB.execute(f"SELECT status, js FROM {self.schema}.{func}{self.paramstring(len(params))}", params) 
-        self.res = DB.fetchall()[0]
+        self.res = DB.fetchone()
 
 if __name__ == "__main__":
     app.run(debug=True)
