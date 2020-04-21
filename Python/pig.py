@@ -47,8 +47,10 @@ class WrongApikey(Exception):
 def wrong_apikey(error):
     return jsonify("{'error':'wrong apikey'}"), 401
 
+
 class MissingName(Exception):
     pass
+
 
 @app.errorhandler(MissingName)
 def missing_name(error):
@@ -85,7 +87,7 @@ def before():
     pig_ = Pig("pig")
 
     pig_.q("apikey_get", apikey)
-    print(pig_.res)
+
     if 200 == pig_.res["status"]:
         pig_.person_id = pig_.res["js"].get("person_id")
         pig_.res = None
@@ -125,11 +127,12 @@ def people_get(pig_):
 def person_get(pig_, id):
     pig_.q("person_get", id)
 
+
 @app.route("/person", methods=["PATCH"])
 @before_and_after()
 def person_update(pig_):
     if request.form.get("name") is None:
-        raise MissingName    
+        raise MissingName
     pig_.q("person_update", pig_.person_id, request.form.get("name"))
 
 
@@ -138,13 +141,13 @@ def person_update(pig_):
 def things_get(pig_):
     if request.method == "GET":
         pig_.q("things_get", pig_.person_id)
-    if request.method == "POST": 
+    if request.method == "POST":
         if request.form.get("name") is None:
             raise MissingName
         pig_.q("thing_add", pig_.person_id, request.form.get("name"))
 
 
-@app.route("/thing/<regex('[1-9][0-9]{0,5}'):id>", methods=['GET', 'PATCH'])
+@app.route("/thing/<regex('[1-9][0-9]{0,5}'):id>", methods=["GET", "PATCH", "DELETE"])
 @before_and_after()
 def thing_get(pig_, id):
     if request.method == "GET":
@@ -153,7 +156,8 @@ def thing_get(pig_, id):
         if request.form.get("name") is None:
             raise MissingName
         pig_.q("thing_update", pig_.person_id, id, request.form.get("name"))
-
+    if request.method == "DELETE":
+        pig_.q("thing_delete", pig_.person_id, id)
 
 
 if __name__ == "__main__":
