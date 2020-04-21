@@ -17,11 +17,11 @@ with open(DIR + '/pig.sql') as f:
 
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify(404, "{}")
+    return jsonify("{}"), 404
 
 @app.errorhandler(401)
 def missing_apikey(error):
-    return jsonify(401, "{'error': 'needs apikey header'}")
+    return jsonify("{'error': 'needs apikey header'}"), 401
 
 class Pig:
     def __init__(self, schema):
@@ -44,31 +44,33 @@ def before():
     apikey = request.headers.get('Apikey')
     print(apikey)
     print(apikey is None)
-    print(re.search("\A[a-z]{4}\Z", apikey))
-    print((apikey is None) or (re.search("\A[a-z]{4}\Z", apikey) is None))
     if (apikey is None) or (re.search("\A[a-z]{4}\Z", apikey) is None):
         abort(401)
 
+    DB.execute(SQL) 
+
     pig_ = Pig('pig')
 
-def after():
+    return pig_
+
+def after(pig_):
     print('after')
-    pass
+    if pig_ and pig_.res:
+        return jsonify(pig_.res['js']), pig_.res['status']
 
 def before_and_after():
     def decorator_func(func):
         @wraps(func)
         def wrapper_func(*args, **kwargs):
-            before()
-            retval = func(*args, **kwargs)
-            after()
-            return jsonify('test')
+            pig_ = before()
+            retval = func(pig_, *args, **kwargs)
+            return after(pig_)
         return wrapper_func
     return decorator_func
 
 @app.route('/')
 @before_and_after()
-def people_get():
+def people_get(pig_):
     pig_.q('people_get')
 
 if __name__ == "__main__":
