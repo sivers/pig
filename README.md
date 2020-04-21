@@ -18,7 +18,7 @@ ruby Ruby/pig.rb
 
 ## Python:
 ```
-pip3 install flask, psycopg2
+pip3 install flask psycopg2
 python3 Python/pig.py
 ```
 
